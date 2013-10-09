@@ -9,10 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
+import android.os.Handler;
 import android.util.Log;
 import de.uniulm.bagception.rfidapi.CMD_PwrMgt.PowerState;
 
-public class RFIDMiniMe {
+public class RFIDMiniMe  {
 	// TODO usbstatelistener
 	private static final UsbCommunication mUsbCommunication = UsbCommunication
 			.getInstance();
@@ -26,12 +27,14 @@ public class RFIDMiniMe {
 	private static MtiCmd mMtiCmd;
 	
 	public static final String BROADCAST_RFID_TAG_FOUND = "de.uniulm.bagception.rfid.broadcast.tagfound";
+
+	private static final Handler broadCastHandler = new Handler();
 	
 	public static synchronized void triggerInventory(final Context c) {
 
 		
 		final ArrayList<String> tagList = new ArrayList<String>();
-		final int scantimes = 25;
+		final int scantimes = 5;
 
 		if (usbstate == UsbState.CONNECTED) {
 			//final ProgressDialog mProgDlg = ProgressDialog.show(c, "Inventory",
@@ -71,7 +74,6 @@ public class RFIDMiniMe {
 							}
 							Collections.sort(tagList);
 							sendBroadcastTagFound(c,tagId);
-							//TODO broadcast intent
 						} else {
 							// #### process error ####
 						}
@@ -85,12 +87,21 @@ public class RFIDMiniMe {
 		}
 	}
 
-	private static void sendBroadcastTagFound(Context c,String tagId){
-		Intent intent = new Intent();
-		intent.setAction(BROADCAST_RFID_TAG_FOUND);
-		intent.putExtra(BROADCAST_RFID_TAG_FOUND, tagId);
-		c.sendBroadcast(intent);
+	private static void sendBroadcastTagFound(final Context c,final String tagId){
+		broadCastHandler.post(new Runnable() {
+			
+			@Override
+			public void run() {
+				Intent intent = new Intent();
+				intent.setAction(BROADCAST_RFID_TAG_FOUND);
+				intent.putExtra(BROADCAST_RFID_TAG_FOUND, tagId);
+				c.sendBroadcast(intent);				
+			}
+		});
+
 	}
+	
+	
 	
 	public static void setPowerLevelTo18() {
 		MtiCmd mMtiCmd = new CMD_AntPortOp.RFID_AntennaPortSetPowerLevel(mUsbCommunication);
