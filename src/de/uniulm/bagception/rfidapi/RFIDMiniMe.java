@@ -14,8 +14,7 @@ import de.uniulm.bagception.rfidapi.connection.USBConnectionServiceCallback;
 import de.uniulm.bagception.rfidapi.connection.USBConnectionServiceHelper;
 
 public class RFIDMiniMe  {
-	private static final UsbCommunication mUsbCommunication = UsbCommunication
-			.getInstance();
+	
 
 
 	private static MtiCmd mMtiCmd;
@@ -25,6 +24,9 @@ public class RFIDMiniMe  {
 	private static final Handler broadCastHandler = new Handler();
 	
 	public static void triggerInventory(final Context c){
+		if (UsbCommunication.getInstance() == null){
+			UsbCommunication.newInstance();
+		}
 		USBConnectionServiceHelper connHelper = new USBConnectionServiceHelper(c,new USBConnectionServiceCallback() {
 			
 			@Override
@@ -66,7 +68,7 @@ public class RFIDMiniMe  {
 					tagList.clear();
 					for (int i = 0; i < scantimes; i++) {
 						mMtiCmd = new CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory(
-								mUsbCommunication);
+								UsbCommunication.getInstance());
 						CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory finalCmd = (CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory) mMtiCmd;
 						if (finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.StartInventory)) {
 							tagId = finalCmd.getTagId();
@@ -123,7 +125,7 @@ public class RFIDMiniMe  {
 	
 	
 	public static void setPowerLevelTo18() {
-		MtiCmd mMtiCmd = new CMD_AntPortOp.RFID_AntennaPortSetPowerLevel(mUsbCommunication);
+		MtiCmd mMtiCmd = new CMD_AntPortOp.RFID_AntennaPortSetPowerLevel(UsbCommunication.getInstance());
 		CMD_AntPortOp.RFID_AntennaPortSetPowerLevel finalCmd = (CMD_AntPortOp.RFID_AntennaPortSetPowerLevel) mMtiCmd;
 		
 		finalCmd.setCmd((byte)18);
@@ -131,7 +133,7 @@ public class RFIDMiniMe  {
 	
 	public static void sleepMode() {
 		MtiCmd mMtiCmd = new CMD_PwrMgt.RFID_PowerEnterPowerState(
-				mUsbCommunication);
+				UsbCommunication.getInstance());
 		CMD_PwrMgt.RFID_PowerEnterPowerState finalCmd = (CMD_PwrMgt.RFID_PowerEnterPowerState) mMtiCmd;
 		finalCmd.setCmd(PowerState.Sleep);
 	}

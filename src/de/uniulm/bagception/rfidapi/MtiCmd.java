@@ -76,7 +76,7 @@ public abstract class MtiCmd {
 		for(int i = 0; i < mParam.size(); i++) {
 			mFinalCmd[i+2] = mParam.get(i).byteValue();
 		}
-
+		
 		usb.sendCmd(mFinalCmd, mParam.size() + 2);
 		
 		// #### log whole command for debug ####

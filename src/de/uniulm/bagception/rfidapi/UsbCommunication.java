@@ -13,7 +13,7 @@ import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbRequest;
 import android.util.Log;
 
-public class UsbCommunication extends Application{
+public class UsbCommunication{
 	public static final String TAG = "UsbControl";
 	private static final boolean DEBUG = true;
 
@@ -33,6 +33,8 @@ public class UsbCommunication extends Application{
 	
 	public static UsbCommunication newInstance() {
 		usbComm = new UsbCommunication();
+		Log.d(TAG,"new usbcomm instance");
+
 		return usbComm;
 	}
 
@@ -143,6 +145,8 @@ public class UsbCommunication extends Application{
             if (mInRequestPool.isEmpty()) {
     			if(DEBUG) Log.d(TAG, "pool is empty");
     			UsbRequest request = new UsbRequest();
+    			Log.d("NPE",mDeviceConnection+"");
+    			Log.d("NPE",mEndpointIn+"");
     			request.initialize(mDeviceConnection, mEndpointIn);
              	return request;
             } else {
