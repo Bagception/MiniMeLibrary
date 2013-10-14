@@ -3,8 +3,6 @@ package de.uniulm.bagception.rfidapi;
 import java.util.ArrayList;
 import java.util.Collections;
 
-
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -12,33 +10,49 @@ import android.media.ToneGenerator;
 import android.os.Handler;
 import android.util.Log;
 import de.uniulm.bagception.rfidapi.CMD_PwrMgt.PowerState;
+import de.uniulm.bagception.rfidapi.connection.USBConnectionServiceCallback;
+import de.uniulm.bagception.rfidapi.connection.USBConnectionServiceHelper;
 
 public class RFIDMiniMe  {
-	// TODO usbstatelistener
 	private static final UsbCommunication mUsbCommunication = UsbCommunication
 			.getInstance();
 
-	public enum UsbState {
-		CONNECTED, DISCONNECTED
-	}; // TODO
-
-	private static UsbState usbstate = UsbState.CONNECTED;
 
 	private static MtiCmd mMtiCmd;
 	
 	public static final String BROADCAST_RFID_TAG_FOUND = "de.uniulm.bagception.rfid.broadcast.tagfound";
-
+	public static final String BROADCAST_RFID_FINISHED = "de.uniulm.bagception.rfid.broadcast.endinventory";
 	private static final Handler broadCastHandler = new Handler();
 	
-	public static synchronized void triggerInventory(final Context c) {
+	public static void triggerInventory(final Context c){
+		USBConnectionServiceHelper connHelper = new USBConnectionServiceHelper(c,new USBConnectionServiceCallback() {
+			
+			@Override
+			public void onUSBConnectionError(Exception e) {
+				e.printStackTrace();
+				
+			}
+			
+			@Override
+			public void onUSBConnected(boolean connected) {
+				if (connected){
+					initInventory(c);					
+				}else{
+					Log.d("USB","USB not connected");
+				}
+				
+				
+			}
+		});
+		connHelper.checkUSBConnection();
+	}
+	
+	private static synchronized void initInventory(final Context c) {
 
 		
 		final ArrayList<String> tagList = new ArrayList<String>();
 		final int scantimes = 5;
 
-		if (usbstate == UsbState.CONNECTED) {
-			//final ProgressDialog mProgDlg = ProgressDialog.show(c, "Inventory",
-				//	"Searching ...", true);
 
 			new Thread() {
 				int numTags;
@@ -79,12 +93,17 @@ public class RFIDMiniMe  {
 						}
 					}
 					//mProgDlg.dismiss();
+					Intent intent = new Intent();
+					intent.setAction(BROADCAST_RFID_FINISHED);
+					c.sendBroadcast(intent);				
+					
 					sleepMode();
+					
 				}
 
 				
 			}.start();
-		}
+		
 	}
 
 	private static void sendBroadcastTagFound(final Context c,final String tagId){
@@ -116,4 +135,9 @@ public class RFIDMiniMe  {
 		CMD_PwrMgt.RFID_PowerEnterPowerState finalCmd = (CMD_PwrMgt.RFID_PowerEnterPowerState) mMtiCmd;
 		finalCmd.setCmd(PowerState.Sleep);
 	}
+	
+	
+	
+	
+	
 }
