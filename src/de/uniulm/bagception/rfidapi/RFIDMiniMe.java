@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Handler;
-import android.util.Log;
+import de.uniulm.bagception.broadcastconstants.BagceptionBroadcastContants;
 import de.uniulm.bagception.rfidapi.CMD_PwrMgt.PowerState;
 import de.uniulm.bagception.rfidapi.connection.USBConnectionServiceCallback;
 import de.uniulm.bagception.rfidapi.connection.USBConnectionServiceHelper;
@@ -19,8 +19,7 @@ public class RFIDMiniMe  {
 
 	private static MtiCmd mMtiCmd;
 	
-	public static final String BROADCAST_RFID_TAG_FOUND = "de.uniulm.bagception.rfid.broadcast.tagfound";
-	public static final String BROADCAST_RFID_FINISHED = "de.uniulm.bagception.rfid.broadcast.endinventory";
+
 	private static final Handler broadCastHandler = new Handler();
 	
 	public static void triggerInventory(final Context c){
@@ -40,7 +39,9 @@ public class RFIDMiniMe  {
 				if (connected){
 					initInventory(c);					
 				}else{
-					Log.d("USB","USB not connected");
+					Intent intent = new Intent();
+					intent.setAction(BagceptionBroadcastContants.BROADCAST_RFID_NOTCONNECTED);
+					c.sendBroadcast(intent);	
 				}
 				
 				
@@ -96,7 +97,8 @@ public class RFIDMiniMe  {
 					}
 					//mProgDlg.dismiss();
 					Intent intent = new Intent();
-					intent.setAction(BROADCAST_RFID_FINISHED);
+					
+					intent.setAction(BagceptionBroadcastContants.BROADCAST_RFID_FINISHED);
 					c.sendBroadcast(intent);				
 					
 					sleepMode();
@@ -114,8 +116,8 @@ public class RFIDMiniMe  {
 			@Override
 			public void run() {
 				Intent intent = new Intent();
-				intent.setAction(BROADCAST_RFID_TAG_FOUND);
-				intent.putExtra(BROADCAST_RFID_TAG_FOUND, tagId);
+				intent.setAction(BagceptionBroadcastContants.BROADCAST_RFID_TAG_FOUND);
+				intent.putExtra(BagceptionBroadcastContants.BROADCAST_RFID_TAG_FOUND, tagId);
 				c.sendBroadcast(intent);				
 			}
 		});
