@@ -3,7 +3,6 @@ package de.uniulm.bagception.rfidapi;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 
-import android.app.Application;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
@@ -21,7 +20,7 @@ public class UsbCommunication{
 	private static UsbDevice mDevice;
 	private static UsbInterface mInterface;
 	private static UsbDeviceConnection mDeviceConnection;
-	private static UsbEndpoint mEndpointOut;
+	//private static UsbEndpoint mEndpointOut;
 	private static UsbEndpoint mEndpointIn;
 	
 	public static int mTagMode;		// 0:Gen2, 1:Gen2+RSSI, 2:ISO6B
@@ -79,7 +78,7 @@ public class UsbCommunication{
 						Log.e(TAG, "not all endpoints found");
 						throw new IllegalArgumentException("not all endpoints found.");
 					}
-					mEndpointOut = epOut;
+					//mEndpointOut = epOut;
 					mEndpointIn = epIn;
 
 					startThread();
@@ -164,6 +163,7 @@ public class UsbCommunication{
 		return mThread;
 	}
 
+	@SuppressWarnings("deprecation")
 	private void stopThread() {
 		mStop = true;
 		try {

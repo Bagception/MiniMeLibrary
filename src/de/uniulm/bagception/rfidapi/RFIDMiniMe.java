@@ -1,7 +1,6 @@
 package de.uniulm.bagception.rfidapi;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 
 import android.content.Context;

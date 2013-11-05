@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: /home/xaffe/Repo/bagception/MiniMeLibrary/src/de/uniulm/bagception/service/USBConnectionServiceRemote.aidl
+ * Original file: X:\\workspaces\\android\\MiniMeLibrary\\src\\de\\uniulm\\bagception\\service\\USBConnectionServiceRemote.aidl
  */
 package de.uniulm.bagception.service;
 public interface USBConnectionServiceRemote extends android.os.IInterface
