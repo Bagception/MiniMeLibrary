@@ -1,7 +1,7 @@
 package de.uniulm.bagception.rfidapi;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +18,7 @@ public class RFIDMiniMe  {
 
 
 	private static MtiCmd mMtiCmd;
+	final static int scantimes = 5;	// number of scan cycles
 	
 
 	private static final Handler broadCastHandler = new Handler();
@@ -52,67 +53,77 @@ public class RFIDMiniMe  {
 	
 	private static synchronized void initInventory(final Context c) {
 
-		
 		final ArrayList<String> tagList = new ArrayList<String>();
-		final int scantimes = 5;
+		final HashSet<String> hashTagList = new HashSet<String>(); // for unique tagIds
 
+		new Thread() {
+			int numTags;
+			String tagId;
 
-			new Thread() {
-				int numTags;
-				String tagId;
+			ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 
-				ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_MUSIC,
-						100);
+			public void run() {
 
-				public void run() {
+				tagList.clear();
+				hashTagList.clear();
+				
+				for (int i = 0; i < scantimes; i++) {
+					
+					mMtiCmd = new CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory(UsbCommunication.getInstance());
+					CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory finalCmd = (CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory) mMtiCmd;
+					
+					if (finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.StartInventory)) {
+						tagId = finalCmd.getTagId();
+						boolean newTagFound = hashTagList.add(tagId);
+						if(newTagFound){
+							tg.startTone(ToneGenerator.TONE_PROP_BEEP);
+							sendBroadcastTagFound(c, tagId);
+						}
+//						if (finalCmd.getTagNumber() > 0) {
+//							tg.startTone(ToneGenerator.TONE_PROP_BEEP);
+//							hashTagList.add(tagId);
+//							// if (!tagList.contains(tagId))
+//							// tagList.add(tagId);
+//							//
+//							// finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.GetAllTags);
+//						}
 
-					tagList.clear();
-					for (int i = 0; i < scantimes; i++) {
-						mMtiCmd = new CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory(
-								UsbCommunication.getInstance());
-						CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory finalCmd = (CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory) mMtiCmd;
-						if (finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.StartInventory)) {
-							tagId = finalCmd.getTagId();
-							if (finalCmd.getTagNumber() > 0) {
-								tg.startTone(ToneGenerator.TONE_PROP_BEEP);
-								if (!tagList.contains(tagId))
-									tagList.add(tagId);
-								// finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.GetAllTags);
-							}
-
-							for (numTags = finalCmd.getTagNumber(); numTags > 1; numTags--) {
-								if (finalCmd
-										.setCmd(CMD_Iso18k6cTagAccess.Action.NextTag)) {
-									tagId = finalCmd.getTagId();
-									if (!tagList.contains(tagId)) {
-										tagList.add(tagId);
-									}
+						for (numTags = finalCmd.getTagNumber(); numTags > 1; numTags--) {
+							if (finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.NextTag)) {
+								tagId = finalCmd.getTagId();
+								// if (!tagList.contains(tagId)) {
+								// tagList.add(tagId);
+								// }
+								newTagFound = hashTagList.add(tagId);
+								if(newTagFound){
+									tg.startTone(ToneGenerator.TONE_PROP_BEEP);
+									sendBroadcastTagFound(c, tagId);
 								}
 							}
-							Collections.sort(tagList);
-							sendBroadcastTagFound(c,tagId);
-						} else {
-							// #### process error ####
 						}
+						// Collections.sort(tagList);
+						tagList.addAll(hashTagList);
+//						sendBroadcastTagFound(c, tagId);
+					} else {
+						// #### process error ####
 					}
-					//mProgDlg.dismiss();
-					Intent intent = new Intent();
-					
-					intent.setAction(BagceptionBroadcastContants.BROADCAST_RFID_FINISHED);
-					c.sendBroadcast(intent);				
-					
-					sleepMode();
-					
 				}
+				// mProgDlg.dismiss();
+				Intent intent = new Intent();
 
-				
-			}.start();
-		
+				intent.setAction(BagceptionBroadcastContants.BROADCAST_RFID_FINISHED);
+				c.sendBroadcast(intent);
+
+				sleepMode();
+
+			}
+
+		}.start();
+
 	}
 
 	private static void sendBroadcastTagFound(final Context c,final String tagId){
 		broadCastHandler.post(new Runnable() {
-			
 			@Override
 			public void run() {
 				Intent intent = new Intent();
@@ -139,9 +150,5 @@ public class RFIDMiniMe  {
 		CMD_PwrMgt.RFID_PowerEnterPowerState finalCmd = (CMD_PwrMgt.RFID_PowerEnterPowerState) mMtiCmd;
 		finalCmd.setCmd(PowerState.Sleep);
 	}
-	
-	
-	
-	
 	
 }
