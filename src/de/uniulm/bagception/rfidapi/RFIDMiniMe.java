@@ -55,7 +55,7 @@ public class RFIDMiniMe  {
 	private static synchronized void initInventory(final Context c) {
 		final ArrayList<String> tagList = new ArrayList<String>();
 		final HashSet<String> hashTagList = new HashSet<String>(); // for unique tagIds
-
+		log("init inventory");
 		new Thread() {
 			int numTags;
 			String tagId;
@@ -94,7 +94,6 @@ public class RFIDMiniMe  {
 								// tagList.add(tagId);
 								// }
 								newTagFound = hashTagList.add(tagId);
-								Log.d("RFIDMiniMe", tagId + " found");
 								if(newTagFound){
 									tg.startTone(ToneGenerator.TONE_PROP_BEEP);
 									sendBroadcastTagFound(c, tagId);
@@ -121,6 +120,8 @@ public class RFIDMiniMe  {
 		}.start();
 
 	}
+
+	
 
 	private static void sendBroadcastTagFound(final Context c,final String tagId){
 		broadCastHandler.post(new Runnable() {
@@ -149,6 +150,10 @@ public class RFIDMiniMe  {
 				UsbCommunication.getInstance());
 		CMD_PwrMgt.RFID_PowerEnterPowerState finalCmd = (CMD_PwrMgt.RFID_PowerEnterPowerState) mMtiCmd;
 		finalCmd.setCmd(PowerState.Sleep);
+	}
+	
+	private static void log(String string) {
+		Log.d("RFIDMiniMe", string);
 	}
 	
 }
