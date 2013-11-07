@@ -1,8 +1,6 @@
 package de.uniulm.bagception.rfidapi;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -19,7 +17,9 @@ public class RFIDMiniMe  {
 
 
 	private static MtiCmd mMtiCmd;
-	final static int scantimes = 5;	// number of scan cycles
+	final static int scantimes = 1;	// number of scan cycles
+	static HashSet<String> hashTagList = new HashSet<String>(); // for unique tagIds
+
 	
 
 	private static final Handler broadCastHandler = new Handler();
@@ -45,63 +45,49 @@ public class RFIDMiniMe  {
 					intent.setAction(BagceptionBroadcastContants.BROADCAST_RFID_NOTCONNECTED);
 					c.sendBroadcast(intent);	
 				}
-				
-				
 			}
 		});
 		connHelper.checkUSBConnection();
 	}
 	
 	private static synchronized void initInventory(final Context c) {
-		final ArrayList<String> tagList = new ArrayList<String>();
-		final HashSet<String> hashTagList = new HashSet<String>(); // for unique tagIds
 		log("init inventory");
 		new Thread() {
-			int numTags;
 			String tagId;
 
 			ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 
 			public void run() {
 
-				tagList.clear();
 				hashTagList.clear();
 				
 				for (int i = 0; i < scantimes; i++) {
 					mMtiCmd = new CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory(UsbCommunication.getInstance());
 					CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory finalCmd = (CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory) mMtiCmd;
-					
 					if (finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.StartInventory)) {
-						tagId = finalCmd.getTagId();
-						boolean newTagFound = hashTagList.add(tagId);
-						if(newTagFound){
-							tg.startTone(ToneGenerator.TONE_PROP_BEEP);
-							sendBroadcastTagFound(c, tagId);
-						}
-//						if (finalCmd.getTagNumber() > 0) {
-//							tg.startTone(ToneGenerator.TONE_PROP_BEEP);
-//							hashTagList.add(tagId);
-//							// if (!tagList.contains(tagId))
-//							// tagList.add(tagId);
-//							//
-//							// finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.GetAllTags);
-//						}
-
-						for (numTags = finalCmd.getTagNumber(); numTags > 1; numTags--) {
-							if (finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.NextTag)) {
-								tagId = finalCmd.getTagId();
-								// if (!tagList.contains(tagId)) {
-								// tagList.add(tagId);
-								// }
-								newTagFound = hashTagList.add(tagId);
-								if(newTagFound){
-									tg.startTone(ToneGenerator.TONE_PROP_BEEP);
-									sendBroadcastTagFound(c, tagId);
-								}
+						log("tag count: " + finalCmd.getTagNumber());
+						for(int tagCount = 0; tagCount < finalCmd.getTagNumber(); tagCount++){
+							boolean newTagFound = hashTagList.add(finalCmd.getTagId());
+							if(newTagFound){
+								tg.startTone(ToneGenerator.TONE_PROP_BEEP);
+								sendBroadcastTagFound(c, finalCmd.getTagId());
+								log("tag added: " + finalCmd.getTagId());
 							}
+							finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.NextTag);
 						}
+
+						
+//						for (numTags = finalCmd.getTagNumber(); numTags > 1; numTags--) {
+//							if (finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.NextTag)) {
+//								tagId = finalCmd.getTagId();
+//								newTagFound = hashTagList.add(tagId);
+//								if(newTagFound){
+//									tg.startTone(ToneGenerator.TONE_PROP_BEEP);
+//									sendBroadcastTagFound(c, tagId);
+//								}
+//							}
+//						}
 						// Collections.sort(tagList);
-						tagList.addAll(hashTagList);
 //						sendBroadcastTagFound(c, tagId);
 					} else {
 						// #### process error ####
