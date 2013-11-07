@@ -1,5 +1,5 @@
 package de.uniulm.bagception.service;
 
-interface USBConnectionServiceRemote{
+interface USBConnectionService{
 	boolean isConnected();
 }

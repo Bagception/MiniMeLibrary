@@ -1,6 +1,7 @@
 package de.uniulm.bagception.rfidapi.connection;
 
-import de.uniulm.bagception.service.USBConnectionServiceRemote;
+import de.uniulm.bagception.service.USBConnectionService;
+import de.uniulm.bagception.services.ServiceNames;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -28,7 +29,7 @@ public class USBConnectionServiceHelper {
 
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			USBConnectionServiceRemote remoteStubService=USBConnectionServiceRemote.Stub.asInterface(service);
+			USBConnectionService remoteStubService=USBConnectionService.Stub.asInterface(service);
 			try {
 				callback.onUSBConnected(remoteStubService.isConnected());
 			} catch (RemoteException e) {
@@ -44,7 +45,7 @@ public class USBConnectionServiceHelper {
 	
 	public void checkUSBConnection(){
 		//final String servicename = "de.uniulm.bagception.service.USBConnectionServiceRemote";
-		final String servicename=USBConnectionServiceRemote.class.getName();
+		final String servicename=ServiceNames.RFID_SERVICE;
 		if (!context.bindService(new Intent(servicename),
 				usbConnectionService, Context.BIND_AUTO_CREATE)){
 			Log.d("Service","error binding to service: "+servicename);
