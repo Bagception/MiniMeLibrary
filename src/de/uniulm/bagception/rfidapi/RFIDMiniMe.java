@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
 import android.os.Handler;
+import android.util.Log;
 import de.uniulm.bagception.broadcastconstants.BagceptionBroadcastContants;
 import de.uniulm.bagception.rfidapi.CMD_PwrMgt.PowerState;
 import de.uniulm.bagception.rfidapi.connection.USBConnectionServiceCallback;
@@ -52,7 +53,6 @@ public class RFIDMiniMe  {
 	}
 	
 	private static synchronized void initInventory(final Context c) {
-
 		final ArrayList<String> tagList = new ArrayList<String>();
 		final HashSet<String> hashTagList = new HashSet<String>(); // for unique tagIds
 
@@ -68,7 +68,6 @@ public class RFIDMiniMe  {
 				hashTagList.clear();
 				
 				for (int i = 0; i < scantimes; i++) {
-					
 					mMtiCmd = new CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory(UsbCommunication.getInstance());
 					CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory finalCmd = (CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory) mMtiCmd;
 					
@@ -95,6 +94,7 @@ public class RFIDMiniMe  {
 								// tagList.add(tagId);
 								// }
 								newTagFound = hashTagList.add(tagId);
+								Log.d("RFIDMiniMe", tagId + " found");
 								if(newTagFound){
 									tg.startTone(ToneGenerator.TONE_PROP_BEEP);
 									sendBroadcastTagFound(c, tagId);
