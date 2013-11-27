@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import de.uniulm.bagception.broadcastconstants.BagceptionBroadcastContants;
@@ -17,7 +18,7 @@ public class RFIDMiniMe  {
 
 
 	private static MtiCmd mMtiCmd;
-	final static int scantimes = 1;	// number of scan cycles
+	final static int scantimes = 5;	// number of scan cycles
 	static HashSet<String> hashTagList = new HashSet<String>(); // for unique tagIds
 
 	
@@ -39,7 +40,7 @@ public class RFIDMiniMe  {
 			@Override
 			public void onUSBConnected(boolean connected) {
 				if (connected){
-					initInventory(c);					
+					initInventory(c);
 				}else{
 					Intent intent = new Intent();
 					intent.setAction(BagceptionBroadcastContants.BROADCAST_RFID_NOTCONNECTED);
@@ -53,13 +54,13 @@ public class RFIDMiniMe  {
 	private static synchronized void initInventory(final Context c) {
 		log("init inventory");
 		new Thread() {
-			String tagId;
+			String tagId;	
 
 			ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 
 			public void run() {
-
-				hashTagList.clear();
+				
+				hashTagList.clear();	// optional?
 				
 				for (int i = 0; i < scantimes; i++) {
 					mMtiCmd = new CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory(UsbCommunication.getInstance());
@@ -69,7 +70,7 @@ public class RFIDMiniMe  {
 						for(int tagCount = 0; tagCount < finalCmd.getTagNumber(); tagCount++){
 							boolean newTagFound = hashTagList.add(finalCmd.getTagId());
 							if(newTagFound){
-								tg.startTone(ToneGenerator.TONE_PROP_BEEP);
+//								tg.startTone(ToneGenerator.TONE_PROP_BEEP);
 								sendBroadcastTagFound(c, finalCmd.getTagId());
 								log("tag added: " + finalCmd.getTagId());
 							}
