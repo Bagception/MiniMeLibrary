@@ -19,6 +19,7 @@ public class RFIDMiniMe  {
 
 	private static MtiCmd mMtiCmd;
 	final static int scantimes = 5;	// number of scan cycles
+	private volatile static boolean isScanning = false; 
 	static HashSet<String> hashTagList = new HashSet<String>(); // for unique tagIds
 
 	
@@ -53,16 +54,17 @@ public class RFIDMiniMe  {
 	
 	private static synchronized void initInventory(final Context c) {
 		log("init inventory");
+		isScanning = true;
 		new Thread() {
 			String tagId;	
 
 			ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
-
+			
 			public void run() {
 				
 				hashTagList.clear();	// optional?
-				
-				for (int i = 0; i < scantimes; i++) {
+				while (isScanning){
+//				for (int i = 0; i < scantimes; i++) {
 					mMtiCmd = new CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory(UsbCommunication.getInstance());
 					CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory finalCmd = (CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory) mMtiCmd;
 					if (finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.StartInventory)) {
@@ -108,7 +110,10 @@ public class RFIDMiniMe  {
 
 	}
 
-	
+
+	public static void stopInventory(){
+		isScanning=false;
+	}
 
 	private static void sendBroadcastTagFound(final Context c,final String tagId){
 		broadCastHandler.post(new Runnable() {
