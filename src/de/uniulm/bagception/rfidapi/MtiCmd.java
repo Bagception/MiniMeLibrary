@@ -80,7 +80,7 @@ public abstract class MtiCmd {
 		usb.sendCmd(mFinalCmd, mParam.size() + 2);
 		
 		// #### log whole command for debug ####
-		if(DEBUG) Log.d(UsbCommunication.TAG, "TX: " + strCmd(mFinalCmd));
+		//if(DEBUG) Log.d(UsbCommunication.TAG, "TX: " + strCmd(mFinalCmd));
 	}
 
 	
@@ -107,7 +107,7 @@ public abstract class MtiCmd {
 		mResponse = usb.getResponse();
 		
 		// #### log whole command for debug ####
-		if(DEBUG) Log.d(UsbCommunication.TAG, "RX: " + strCmd(mResponse));
+		//if(DEBUG) Log.d(UsbCommunication.TAG, "RX: " + strCmd(mResponse));
 		return mResponse;
 	}
 

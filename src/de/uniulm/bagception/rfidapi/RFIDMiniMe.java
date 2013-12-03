@@ -1,11 +1,11 @@
 package de.uniulm.bagception.rfidapi;
 
 import java.util.HashSet;
+
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import de.uniulm.bagception.broadcastconstants.BagceptionBroadcastContants;
@@ -18,10 +18,10 @@ public class RFIDMiniMe  {
 
 
 	private static MtiCmd mMtiCmd;
-	final static int scantimes = 5;	// number of scan cycles
 	private volatile static boolean isScanning = false; 
 	static HashSet<String> hashTagList = new HashSet<String>(); // for unique tagIds
 
+	private static double startTime=0;
 	
 
 	private static final Handler broadCastHandler = new Handler();
@@ -55,15 +55,26 @@ public class RFIDMiniMe  {
 	private static synchronized void initInventory(final Context c) {
 		log("init inventory");
 		isScanning = true;
+		startTime = System.currentTimeMillis();
+		
 		new Thread() {
 			String tagId;	
 
 			ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 			
 			public void run() {
-				
+				int scanTimes = 0;
 				hashTagList.clear();	// optional?
 				while (isScanning){
+					
+					//stop after 3 min
+					scanTimes++;
+					if (scanTimes%100 == 0){
+						if (System.currentTimeMillis()-startTime>1000*3*60){
+							isScanning=false;
+							break;
+						}
+					}
 //				for (int i = 0; i < scantimes; i++) {
 					mMtiCmd = new CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory(UsbCommunication.getInstance());
 					CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory finalCmd = (CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory) mMtiCmd;

@@ -14,7 +14,7 @@ import android.util.Log;
 
 public class UsbCommunication{
 	public static final String TAG = "UsbControl";
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	private static UsbCommunication usbComm;
 	private static UsbDevice mDevice;
