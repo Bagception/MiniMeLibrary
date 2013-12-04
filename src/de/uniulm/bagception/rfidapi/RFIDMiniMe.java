@@ -63,18 +63,23 @@ public class RFIDMiniMe  {
 			ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
 			
 			public void run() {
-				int scanTimes = 0;
+				
 				hashTagList.clear();	// optional?
+				{
+					Intent intent = new Intent();
+					intent.setAction(BagceptionBroadcastContants.BROADCAST_RFID_START_SCANNING);
+					c.sendBroadcast(intent);
+				}
 				while (isScanning){
 					
 					//stop after 3 min
-					scanTimes++;
-					if (scanTimes%100 == 0){
-						if (System.currentTimeMillis()-startTime>1000*3*60){
-							isScanning=false;
-							break;
-						}
+					
+					
+					if (System.currentTimeMillis()-startTime>1000*3*60){
+						isScanning=false;
+						break;
 					}
+				
 //				for (int i = 0; i < scantimes; i++) {
 					mMtiCmd = new CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory(UsbCommunication.getInstance());
 					CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory finalCmd = (CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory) mMtiCmd;
@@ -85,6 +90,7 @@ public class RFIDMiniMe  {
 							if(newTagFound){
 //								tg.startTone(ToneGenerator.TONE_PROP_BEEP);
 								sendBroadcastTagFound(c, finalCmd.getTagId());
+								startTime=System.currentTimeMillis();//update timestamp, to prevent stop scanning 
 								log("tag added: " + finalCmd.getTagId());
 							}
 							finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.NextTag);
