@@ -80,35 +80,20 @@ public class RFIDMiniMe  {
 						break;
 					}
 				
-//				for (int i = 0; i < scantimes; i++) {
 					mMtiCmd = new CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory(UsbCommunication.getInstance());
 					CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory finalCmd = (CMD_Iso18k6cTagAccess.RFID_18K6CTagInventory) mMtiCmd;
 					if (finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.StartInventory)) {
-						log("tag count: " + finalCmd.getTagNumber());
 						for(int tagCount = 0; tagCount < finalCmd.getTagNumber(); tagCount++){
 							boolean newTagFound = hashTagList.add(finalCmd.getTagId());
 							if(newTagFound){
-//								tg.startTone(ToneGenerator.TONE_PROP_BEEP);
-								sendBroadcastTagFound(c, finalCmd.getTagId());
+								// send broadcast and remove last character from string (blank)
+								sendBroadcastTagFound(c, finalCmd.getTagId().substring(0, finalCmd.getTag().length()-1));
 								startTime=System.currentTimeMillis();//update timestamp, to prevent stop scanning 
 								log("tag added: " + finalCmd.getTagId());
 							}
 							finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.NextTag);
 						}
 
-						
-//						for (numTags = finalCmd.getTagNumber(); numTags > 1; numTags--) {
-//							if (finalCmd.setCmd(CMD_Iso18k6cTagAccess.Action.NextTag)) {
-//								tagId = finalCmd.getTagId();
-//								newTagFound = hashTagList.add(tagId);
-//								if(newTagFound){
-//									tg.startTone(ToneGenerator.TONE_PROP_BEEP);
-//									sendBroadcastTagFound(c, tagId);
-//								}
-//							}
-//						}
-						// Collections.sort(tagList);
-//						sendBroadcastTagFound(c, tagId);
 					} else {
 						// #### process error ####
 					}
