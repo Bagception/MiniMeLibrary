@@ -4,8 +4,6 @@ import java.util.HashSet;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.ToneGenerator;
 import android.os.Handler;
 import android.util.Log;
 import de.uniulm.bagception.broadcastconstants.BagceptionBroadcastContants;
@@ -58,10 +56,8 @@ public class RFIDMiniMe  {
 		startTime = System.currentTimeMillis();
 		
 		new Thread() {
-			String tagId;	
+				
 
-			ToneGenerator tg = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
-			
 			public void run() {
 				
 				hashTagList.clear();	// optional?
@@ -87,7 +83,7 @@ public class RFIDMiniMe  {
 							boolean newTagFound = hashTagList.add(finalCmd.getTagId());
 							if(newTagFound){
 								// send broadcast and remove last character from string (blank)
-								sendBroadcastTagFound(c, finalCmd.getTagId().substring(0, finalCmd.getTag().length()-1));
+								sendBroadcastTagFound(c, finalCmd.getTag().trim());
 								startTime=System.currentTimeMillis();//update timestamp, to prevent stop scanning 
 								log("tag added: " + finalCmd.getTagId());
 							}
