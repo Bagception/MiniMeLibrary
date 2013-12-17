@@ -88,6 +88,7 @@ public abstract class MtiCmd {
 		boolean result = false;
 		
 		getDataFromUsb();
+		if (mResponse == null) return false;
 		mStatus = mResponse[2];
 		getStatus();
 		

@@ -129,6 +129,7 @@ public class UsbCommunication{
 	
 	public byte[] getResponse() {
 		UsbRequest request = getInRequest();
+		if (request == null) return null;
 		request.queue(mDataBuffer, DATA_LENGTH);
 
 		if(mDataBuffer.hasArray()) {
@@ -146,6 +147,8 @@ public class UsbCommunication{
     			UsbRequest request = new UsbRequest();
     			Log.d("NPE",mDeviceConnection+"");
     			Log.d("NPE",mEndpointIn+"");
+    			if (mDeviceConnection == null) return null;
+    			if (mEndpointIn == null) return null;
     			request.initialize(mDeviceConnection, mEndpointIn);
              	return request;
             } else {

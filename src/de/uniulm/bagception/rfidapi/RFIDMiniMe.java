@@ -64,8 +64,8 @@ public class RFIDMiniMe  {
 			
 			@Override
 			public void onUSBConnected(boolean connected) {
+				RFIDMiniMe.stopInventory();
 				if (connected){
-					RFIDMiniMe.stopInventory();
 					RFIDMiniMe.sleepMode();
 				}
 			}
