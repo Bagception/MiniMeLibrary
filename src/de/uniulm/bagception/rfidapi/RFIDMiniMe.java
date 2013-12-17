@@ -50,6 +50,30 @@ public class RFIDMiniMe  {
 		connHelper.checkUSBConnection();
 	}
 	
+	public static void disableBlinking(final Context c){
+		if (UsbCommunication.getInstance() == null){
+			UsbCommunication.newInstance();
+		}
+		USBConnectionServiceHelper connHelper = new USBConnectionServiceHelper(c,new USBConnectionServiceCallback() {
+			
+			@Override
+			public void onUSBConnectionError(Exception e) {
+				e.printStackTrace();
+				
+			}
+			
+			@Override
+			public void onUSBConnected(boolean connected) {
+				if (connected){
+					RFIDMiniMe.stopInventory();
+					RFIDMiniMe.sleepMode();
+				}
+			}
+		});
+		connHelper.checkUSBConnection();
+	}
+	
+	
 	private static synchronized void initInventory(final Context c) {
 		log("init inventory");
 		isScanning = true;
