@@ -145,10 +145,16 @@ public class UsbCommunication{
             if (mInRequestPool.isEmpty()) {
     			if(DEBUG) Log.d(TAG, "pool is empty");
     			UsbRequest request = new UsbRequest();
-    			Log.d("NPE",mDeviceConnection+"");
-    			Log.d("NPE",mEndpointIn+"");
-    			if (mDeviceConnection == null) return null;
-    			if (mEndpointIn == null) return null;
+    			if (mDeviceConnection == null){
+    				mStop = true;
+    				Log.d("NPE","mDeviceConnection is null");
+    				return null;
+    			}
+    			if (mEndpointIn == null){
+    				mStop = true;
+    				Log.d("NPE","mEndpointIn is null");
+    				return null;
+    			}
     			request.initialize(mDeviceConnection, mEndpointIn);
              	return request;
             } else {
