@@ -190,7 +190,10 @@ public class UsbCommunication{
 						Log.d(TAG, "Stop Thread");
 						return;
 					}
-				
+					
+				if (mDeviceConnection == null){
+					return;
+				}
 				UsbRequest request = mDeviceConnection.requestWait();
 
 				if(request == null)
